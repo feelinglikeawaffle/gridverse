@@ -1,37 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmic Colony</title>
+
     style.css
 </head>
 <body>
 
-    <div id="topBar">
+<div id="stars"></div>
 
-        <div class="resourceGroup">
-            <div>☀ DAY 1</div>
-            <div>Food: <span id="food">0</span></div>
-            <div>Crystal: <span id="crystal">0</span></div>
-        </div>
+<header id="topBar">
 
-        <div id="phaseDisplay">
-            DAY
-        </div>
-
-        <div class="resourceGroup">
-            <div>HP: <span id="hp">100</span></div>
-            <div>⚔ <span id="attack">0</span></div>
-            <div>🛡 <span id="defense">0</span></div>
-        </div>
-
+    <div class="panel">
+        <div class="label">DAY</div>
+        <div id="dayCount">1</div>
     </div>
 
+    <div class="panel">
+        <div class="label">PHASE</div>
+        <div id="phase">DAY ☀</div>
+    </div>
+
+    <div class="panel">
+        <div class="label">FOOD</div>
+        <div id="food">0</div>
+    </div>
+
+    <div class="panel">
+        <div class="label">CRYSTAL</div>
+        <div id="crystal">0</div>
+    </div>
+
+    <div class="panel">
+        <button id="phaseBtn">TOGGLE</button>
+    </div>
+
+</header>
+
+<main>
     <div id="board"></div>
+</main>
 
-    <div id="floatingTextLayer"></div>
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
