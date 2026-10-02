@@ -1,0 +1,167 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:#060818;
+    color:white;
+    font-family:Verdana,sans-serif;
+}
+
+#stars{
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(white 1px, transparent 1px),
+        radial-gradient(#88aaff 1px, transparent 1px);
+    background-size:60px 60px,120px 120px;
+    opacity:.25;
+    animation:drift 30s linear infinite;
+    z-index:-1;
+}
+
+@keyframes drift{
+    from{
+        transform:translateY(0px);
+    }
+    to{
+        transform:translateY(120px);
+    }
+}
+
+#topBar{
+    height:90px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+
+    background:rgba(10,10,25,.85);
+
+    border-bottom:4px solid #4a68ff;
+}
+
+.panel{
+    min-width:120px;
+
+    text-align:center;
+
+    border:2px solid #4a68ff;
+
+    padding:8px;
+
+    background:#141a35;
+}
+
+.label{
+    color:#7ea8ff;
+    font-size:12px;
+}
+
+#phaseBtn{
+    cursor:pointer;
+    width:100%;
+    padding:10px;
+
+    background:#4a68ff;
+    color:white;
+    border:none;
+    font-weight:bold;
+}
+
+main{
+    height:calc(100vh - 90px);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#board{
+
+    width:min(90vw,85vh);
+    height:min(90vw,85vh);
+
+    display:grid;
+
+    grid-template-columns:repeat(8,1fr);
+    grid-template-rows:repeat(8,1fr);
+
+    gap:4px;
+}
+
+.tile{
+    border-radius:10px;
+
+    border:2px solid rgba(255,255,255,.1);
+
+    cursor:pointer;
+
+    transition:
+        transform .15s,
+        opacity .2s;
+}
+
+.tile:hover{
+    transform:scale(1.08);
+}
+
+.selected{
+    outline:4px solid white;
+}
+
+.matched{
+    animation:pop .25s forwards;
+}
+
+@keyframes pop{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.35);
+    }
+
+    100%{
+        transform:scale(0);
+        opacity:0;
+    }
+}
+
+.circle{
+    background:#59d9ff;
+}
+
+.square{
+    background:#66ff8c;
+}
+
+.triangle{
+    background:#ffd85a;
+}
+
+.diamond{
+    background:#d56aff;
+}
+
+.sword{
+    background:#ff6262;
+}
+
+.shield{
+    background:#5a87ff;
+}
+
+.skull{
+    background:#888;
+}
+
+.fire{
+    background:#ff983d;
+}
