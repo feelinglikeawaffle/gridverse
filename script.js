@@ -1,316 +1,459 @@
-const SIZE = 8;
+const BOARD_SIZE = 8;
 
 const boardElement = document.getElementById("board");
 
+const RESOURCE_TYPES = [
+    "fe",
+    "cu",
+    "au",
+    "ti",
+    "al"
+];
+
+const resources = {
+    fe: 0,
+    cu: 0,
+    au: 0,
+    ti: 0,
+    al: 0
+};
+
 let board = [];
-
 let selected = null;
+let busy = false;
 
-let phase = "day";
+/* -------------------- */
+/* BOARD CREATION */
+/* -------------------- */
 
-let food = 0;
-let crystal = 0;
-
-const dayTiles = [
-    "circle",
-    "square",
-    "triangle",
-    "diamond"
-];
-
-const nightTiles = [
-    "sword",
-    "shield",
-    "skull",
-    "fire"
-];
-
-function tilePool(){
-    return phase === "day"
-        ? dayTiles
-        : nightTiles;
-}
-
-function randomTile(){
-
-    const pool = tilePool();
-
-    return pool[
-        Math.floor(Math.random()*pool.length)
+function randomType() {
+    return RESOURCE_TYPES[
+        Math.floor(Math.random() * RESOURCE_TYPES.length)
     ];
 }
 
-function createBoard(){
+function createBoard() {
 
     board = [];
 
-    for(let y=0;y<SIZE;y++){
+    for(let y = 0; y < BOARD_SIZE; y++) {
 
-        const row=[];
+        board[y] = [];
 
-        for(let x=0;x<SIZE;x++){
-
-            row.push(randomTile());
-
+        for(let x = 0; x < BOARD_SIZE; x++) {
+            board[y][x] = randomType();
         }
-
-        board.push(row);
     }
 
-    drawBoard();
+    removeStartingMatches();
 
-    resolveBoard();
+    renderBoard();
 }
 
-function drawBoard(){
+function removeStartingMatches() {
 
-    boardElement.innerHTML="";
+    while(true) {
 
-    for(let y=0;y<SIZE;y++){
+        const matches = findMatches();
 
-        for(let x=0;x<SIZE;x++){
+        if(matches.length === 0) {
+            break;
+        }
 
-            const tile=document.createElement("div");
+        matches.forEach(pos => {
+            board[pos.y][pos.x] = randomType();
+        });
+    }
+}
 
-            tile.className=
-                "tile " + board[y][x];
+/* -------------------- */
+/* RENDER */
+/* -------------------- */
+
+function renderBoard() {
+
+    boardElement.innerHTML = "";
+
+    for(let y = 0; y < BOARD_SIZE; y++) {
+
+        for(let x = 0; x < BOARD_SIZE; x++) {
+
+            const tile = document.createElement("div");
+
+            tile.className = "tile";
 
             if(
                 selected &&
-                selected.x===x &&
-                selected.y===y
-            ){
+                selected.x === x &&
+                selected.y === y
+            ) {
                 tile.classList.add("selected");
             }
 
-            tile.onclick=()=>tileClick(x,y);
+            const img = document.createElement("img");
+
+            img.src = `assets/${board[y][x]}.png`;
+
+            tile.appendChild(img);
+
+            tile.dataset.x = x;
+            tile.dataset.y = y;
+
+            tile.addEventListener("click", () => {
+                handleTileClick(x, y);
+            });
 
             boardElement.appendChild(tile);
         }
     }
 
-    document.getElementById("food").textContent=food;
-
-    document.getElementById("crystal").textContent=crystal;
-
-    document.getElementById("phase").textContent=
-        phase==="day"
-        ? "DAY ☀"
-        : "NIGHT 🌙";
+    updateUI();
 }
 
-function tileClick(x,y){
+/* -------------------- */
+/* UI */
+/* -------------------- */
 
-    if(!selected){
+function updateUI() {
 
-        selected={x,y};
+    document.getElementById("feCount").textContent =
+        resources.fe;
 
-        drawBoard();
+    document.getElementById("cuCount").textContent =
+        resources.cu;
+
+    document.getElementById("auCount").textContent =
+        resources.au;
+
+    document.getElementById("tiCount").textContent =
+        resources.ti;
+
+    document.getElementById("alCount").textContent =
+        resources.al;
+}
+
+/* -------------------- */
+/* INPUT */
+/* -------------------- */
+
+function handleTileClick(x,y) {
+
+    if(busy) return;
+
+    if(!selected) {
+
+        selected = {x,y};
+
+        renderBoard();
 
         return;
     }
 
-    const dx=Math.abs(selected.x-x);
-    const dy=Math.abs(selected.y-y);
+    const dx =
+        Math.abs(selected.x - x);
 
-    if(dx+dy===1){
+    const dy =
+        Math.abs(selected.y - y);
 
-        swap(
-            selected.x,
-            selected.y,
-            x,
-            y
-        );
+    if(dx + dy !== 1) {
 
-        drawBoard();
+        selected = {x,y};
 
-        setTimeout(resolveBoard,50);
-    }
-
-    selected=null;
-
-    drawBoard();
-}
-
-function swap(x1,y1,x2,y2){
-
-    const temp=board[y1][x1];
-
-    board[y1][x1]=board[y2][x2];
-
-    board[y2][x2]=temp;
-}
-
-function findMatches(){
-
-    const matches=[];
-
-    for(let y=0;y<SIZE;y++){
-
-        let streak=1;
-
-        for(let x=1;x<SIZE;x++){
-
-            if(
-                board[y][x] &&
-                board[y][x]===board[y][x-1]
-            ){
-                streak++;
-            }
-            else{
-
-                if(streak>=3){
-
-                    for(let i=0;i<streak;i++){
-
-                        matches.push({
-                            x:x-1-i,
-                            y
-                        });
-                    }
-                }
-
-                streak=1;
-            }
-        }
-
-        if(streak>=3){
-
-            for(let i=0;i<streak;i++){
-
-                matches.push({
-                    x:SIZE-1-i,
-                    y
-                });
-            }
-        }
-    }
-
-    for(let x=0;x<SIZE;x++){
-
-        let streak=1;
-
-        for(let y=1;y<SIZE;y++){
-
-            if(
-                board[y][x] &&
-                board[y][x]===board[y-1][x]
-            ){
-                streak++;
-            }
-            else{
-
-                if(streak>=3){
-
-                    for(let i=0;i<streak;i++){
-
-                        matches.push({
-                            x,
-                            y:y-1-i
-                        });
-                    }
-                }
-
-                streak=1;
-            }
-        }
-
-        if(streak>=3){
-
-            for(let i=0;i<streak;i++){
-
-                matches.push({
-                    x,
-                    y:SIZE-1-i
-                });
-            }
-        }
-    }
-
-    return matches;
-}
-
-function resolveBoard(){
-
-    const matches=findMatches();
-
-    if(matches.length===0){
-
-        drawBoard();
+        renderBoard();
 
         return;
     }
 
-    matches.forEach(pos=>{
+    performSwap(
+        selected.x,
+        selected.y,
+        x,
+        y
+    );
 
-        const type=board[pos.y][pos.x];
+    selected = null;
+}
 
-        if(phase==="day"){
+/* -------------------- */
+/* SWAP */
+/* -------------------- */
 
-            if(type==="circle") food++;
-            if(type==="diamond") crystal++;
+function performSwap(x1,y1,x2,y2) {
 
+    swapTiles(x1,y1,x2,y2);
+
+    renderBoard();
+
+    const matches = findMatches();
+
+    if(matches.length === 0) {
+
+        setTimeout(() => {
+
+            swapTiles(
+                x1,y1,
+                x2,y2
+            );
+
+            renderBoard();
+
+        },150);
+
+        return;
+    }
+
+    resolveBoard();
+}
+
+function swapTiles(x1,y1,x2,y2) {
+
+    const temp =
+        board[y1][x1];
+
+    board[y1][x1] =
+        board[y2][x2];
+
+    board[y2][x2] =
+        temp;
+}
+
+/* -------------------- */
+/* MATCH FINDING */
+/* -------------------- */
+
+function findMatches() {
+
+    const matched =
+        new Set();
+
+    // Horizontal
+
+    for(let y=0;y<BOARD_SIZE;y++) {
+
+        let streak = 1;
+
+        for(
+            let x=1;
+            x<BOARD_SIZE;
+            x++
+        ) {
+
+            if(
+                board[y][x] ===
+                board[y][x-1]
+            ) {
+
+                streak++;
+
+            } else {
+
+                if(streak >= 3) {
+
+                    for(
+                        let i=0;
+                        i<streak;
+                        i++
+                    ) {
+
+                        matched.add(
+                            `${x-1-i},${y}`
+                        );
+                    }
+                }
+
+                streak = 1;
+            }
         }
 
-        board[pos.y][pos.x]=null;
+        if(streak >= 3) {
+
+            for(
+                let i=0;
+                i<streak;
+                i++
+            ) {
+
+                matched.add(
+                    `${BOARD_SIZE-1-i},${y}`
+                );
+            }
+        }
+    }
+
+    // Vertical
+
+    for(let x=0;x<BOARD_SIZE;x++) {
+
+        let streak = 1;
+
+        for(
+            let y=1;
+            y<BOARD_SIZE;
+            y++
+        ) {
+
+            if(
+                board[y][x] ===
+                board[y-1][x]
+            ) {
+
+                streak++;
+
+            } else {
+
+                if(streak >= 3) {
+
+                    for(
+                        let i=0;
+                        i<streak;
+                        i++
+                    ) {
+
+                        matched.add(
+                            `${x},${y-1-i}`
+                        );
+                    }
+                }
+
+                streak = 1;
+            }
+        }
+
+        if(streak >= 3) {
+
+            for(
+                let i=0;
+                i<streak;
+                i++
+            ) {
+
+                matched.add(
+                    `${x},${BOARD_SIZE-1-i}`
+                );
+            }
+        }
+    }
+
+    return [...matched].map(str=>{
+
+        const [x,y] =
+            str.split(",");
+
+        return {
+            x:Number(x),
+            y:Number(y)
+        };
+
     });
-
-    drawBoard();
-
-    setTimeout(()=>{
-
-        dropTiles();
-
-        drawBoard();
-
-        setTimeout(resolveBoard,120);
-
-    },150);
 }
 
-function dropTiles(){
+/* -------------------- */
+/* CASCADES */
+/* -------------------- */
 
-    for(let x=0;x<SIZE;x++){
+async function resolveBoard() {
 
-        let stack=[];
+    busy = true;
 
-        for(let y=SIZE-1;y>=0;y--){
+    while(true) {
 
-            if(board[y][x]){
+        const matches =
+            findMatches();
 
-                stack.push(
-                    board[y][x]
+        if(matches.length === 0) {
+            break;
+        }
+
+        matches.forEach(pos => {
+
+            const type =
+                board[pos.y][pos.x];
+
+            resources[type]++;
+
+            board[pos.y][pos.x] =
+                null;
+        });
+
+        renderBoard();
+
+        await delay(150);
+
+        collapseBoard();
+
+        renderBoard();
+
+        await delay(200);
+    }
+
+    busy = false;
+}
+
+function collapseBoard() {
+
+    for(
+        let x=0;
+        x<BOARD_SIZE;
+        x++
+    ) {
+
+        let column = [];
+
+        for(
+            let y=BOARD_SIZE-1;
+            y>=0;
+            y--
+        ) {
+
+            const value =
+                board[y][x];
+
+            if(value !== null) {
+
+                column.push(
+                    value
                 );
             }
         }
 
-        for(let y=SIZE-1;y>=0;y--){
+        for(
+            let y=BOARD_SIZE-1;
+            y>=0;
+            y--
+        ) {
 
-            if(stack.length){
+            if(column.length > 0) {
 
-                board[y][x]=stack.shift();
+                board[y][x] =
+                    column.shift();
 
-            }else{
+            } else {
 
-                board[y][x]=randomTile();
+                board[y][x] =
+                    randomType();
             }
         }
     }
 }
 
-document
-.getElementById("phaseBtn")
-.addEventListener(
-"click",
-()=>{
+/* -------------------- */
+/* HELPERS */
+/* -------------------- */
 
-    phase=
-        phase==="day"
-        ? "night"
-        : "day";
+function delay(ms) {
 
-    createBoard();
+    return new Promise(resolve => {
 
-});
+        setTimeout(
+            resolve,
+            ms
+        );
+
+    });
+}
+
+/* -------------------- */
+/* START */
+/* -------------------- */
 
 createBoard();
