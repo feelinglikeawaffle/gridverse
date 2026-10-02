@@ -4,74 +4,132 @@
     box-sizing:border-box;
 }
 
+:root{
+    --ui-bg:#101827;
+    --ui-border:#4d6dff;
+    --ui-text:#dce6ff;
+
+    --board-bg:#0d1320;
+}
+
 body{
     overflow:hidden;
-    background:#060818;
+    background:#050713;
     color:white;
-    font-family:Verdana,sans-serif;
+    font-family:Arial, sans-serif;
+    height:100vh;
 }
 
-#stars{
+/* ====================================
+   STARFIELD
+==================================== */
+
+#starfield{
     position:fixed;
     inset:0;
+    z-index:-2;
+
     background:
-        radial-gradient(white 1px, transparent 1px),
-        radial-gradient(#88aaff 1px, transparent 1px);
-    background-size:60px 60px,120px 120px;
-    opacity:.25;
-    animation:drift 30s linear infinite;
-    z-index:-1;
+    radial-gradient(circle at 20% 20%, rgba(100,120,255,.18), transparent 30%),
+    radial-gradient(circle at 80% 40%, rgba(255,80,180,.10), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(80,255,255,.08), transparent 40%),
+    #050713;
 }
 
-@keyframes drift{
+#starfield::before{
+    content:"";
+
+    position:absolute;
+    inset:0;
+
+    background-image:
+    radial-gradient(white 1px, transparent 1px);
+
+    background-size:40px 40px;
+
+    opacity:.5;
+
+    animation:starsMove 40s linear infinite;
+}
+
+@keyframes starsMove{
+
     from{
         transform:translateY(0px);
     }
+
     to{
-        transform:translateY(120px);
+        transform:translateY(200px);
     }
+
 }
+
+/* ====================================
+   TOP BAR
+==================================== */
 
 #topBar{
     height:90px;
 
     display:flex;
-    justify-content:center;
+    justify-content:space-between;
     align-items:center;
-    gap:15px;
 
-    background:rgba(10,10,25,.85);
+    padding:12px 24px;
 
-    border-bottom:4px solid #4a68ff;
+    background:rgba(10,15,30,.9);
+
+    border-bottom:3px solid var(--ui-border);
+
+    backdrop-filter:blur(8px);
 }
 
-.panel{
-    min-width:120px;
+#gameInfo{
+    display:flex;
+    gap:10px;
+}
 
-    text-align:center;
-
-    border:2px solid #4a68ff;
+.resource{
+    min-width:70px;
 
     padding:8px;
 
-    background:#141a35;
+    text-align:center;
+
+    border:2px solid var(--ui-border);
+
+    background:var(--ui-bg);
+
+    color:var(--ui-text);
+
+    border-radius:10px;
 }
 
-.label{
-    color:#7ea8ff;
-    font-size:12px;
+.resource span{
+    display:block;
 }
 
-#phaseBtn{
-    cursor:pointer;
-    width:100%;
-    padding:10px;
+.resource span:first-child{
+    font-weight:bold;
+    margin-bottom:4px;
+}
 
-    background:#4a68ff;
-    color:white;
-    border:none;
+#phasePanel{
+    text-align:right;
+}
+
+#dayDisplay{
+    font-size:22px;
     font-weight:bold;
 }
+
+#phaseDisplay{
+    color:#81a4ff;
+}
+
+/* ====================================
+   MAIN LAYOUT
+==================================== */
 
 main{
     height:calc(100vh - 90px);
@@ -81,10 +139,26 @@ main{
     align-items:center;
 }
 
+/* ====================================
+   BOARD
+==================================== */
+
+#boardContainer{
+
+    width:min(92vw,86vh);
+    height:min(92vw,86vh);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
 #board{
 
-    width:min(90vw,85vh);
-    height:min(90vw,85vh);
+    width:100%;
+    height:100%;
+
+    position:relative;
 
     display:grid;
 
@@ -92,77 +166,151 @@ main{
     grid-template-rows:repeat(8,1fr);
 
     gap:4px;
+
+    padding:12px;
+
+    border:3px solid var(--ui-border);
+
+    border-radius:16px;
+
+    background:var(--board-bg);
+
+    box-shadow:
+    0 0 40px rgba(70,100,255,.25);
 }
 
+/* ====================================
+   TILES
+==================================== */
+
 .tile{
+
+    position:relative;
+
     border-radius:10px;
 
-    border:2px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.03);
+
+    border:1px solid rgba(255,255,255,.08);
 
     cursor:pointer;
 
+    user-select:none;
+
     transition:
-        transform .15s,
-        opacity .2s;
+        transform .18s ease,
+        opacity .18s ease,
+        filter .18s ease;
 }
 
 .tile:hover{
-    transform:scale(1.08);
+
+    transform:scale(1.06);
+
+    filter:brightness(1.15);
 }
 
-.selected{
-    outline:4px solid white;
+.tile.selected{
+
+    outline:3px solid white;
 }
 
-.matched{
-    animation:pop .25s forwards;
+/* ====================================
+   SPRITES
+==================================== */
+
+.tile img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:contain;
+
+    image-rendering:pixelated;
+
+    pointer-events:none;
 }
 
-@keyframes pop{
+/* ====================================
+   MATCH EFFECT
+==================================== */
+
+.tile.matched{
+
+    animation:explode .20s forwards;
+}
+
+@keyframes explode{
 
     0%{
         transform:scale(1);
+        opacity:1;
     }
 
     50%{
-        transform:scale(1.35);
+        transform:scale(1.25);
     }
 
     100%{
         transform:scale(0);
         opacity:0;
     }
+
 }
 
-.circle{
-    background:#59d9ff;
+/* ====================================
+   FALLING
+==================================== */
+
+.tile.falling{
+
+    transition:
+        transform .25s ease-out;
 }
 
-.square{
-    background:#66ff8c;
+/* ====================================
+   COMBO TEXT
+==================================== */
+
+#floatingTextLayer{
+
+    position:fixed;
+
+    inset:0;
+
+    pointer-events:none;
 }
 
-.triangle{
-    background:#ffd85a;
+.comboText{
+
+    position:absolute;
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    color:#ffd85a;
+
+    text-shadow:
+        2px 2px 0 black;
+
+    animation:comboPop .9s forwards;
 }
 
-.diamond{
-    background:#d56aff;
-}
+@keyframes comboPop{
 
-.sword{
-    background:#ff6262;
-}
+    0%{
+        opacity:0;
+        transform:translateY(20px);
+    }
 
-.shield{
-    background:#5a87ff;
-}
+    20%{
+        opacity:1;
+    }
 
-.skull{
-    background:#888;
-}
+    100%{
+        opacity:0;
+        transform:translateY(-60px);
+    }
 
-.fire{
-    background:#ff983d;
 }
-
