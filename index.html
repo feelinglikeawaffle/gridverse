@@ -3,48 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Cosmic Colony</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="stars"></div>
+    <div id="starfield"></div>
 
-<header id="topBar">
+    <header id="topBar">
 
-    <div class="panel">
-        <div class="label">DAY</div>
-        <div id="dayCount">1</div>
-    </div>
+        <div id="gameInfo">
 
-    <div class="panel">
-        <div class="label">PHASE</div>
-        <div id="phase">DAY ☀</div>
-    </div>
+            <div class="resource">
+                <span>Fe</span>
+                <span id="feCount">0</span>
+            </div>
 
-    <div class="panel">
-        <div class="label">FOOD</div>
-        <div id="food">0</div>
-    </div>
+            <div class="resource">
+                <span>Cu</span>
+                <span id="cuCount">0</span>
+            </div>
 
-    <div class="panel">
-        <div class="label">CRYSTAL</div>
-        <div id="crystal">0</div>
-    </div>
+            <div class="resource">
+                <span>Au</span>
+                <span id="auCount">0</span>
+            </div>
 
-    <div class="panel">
-        <button id="phaseBtn">TOGGLE</button>
-    </div>
+            <div class="resource">
+                <span>Ti</span>
+                <span id="tiCount">0</span>
+            </div>
 
-</header>
+            <div class="resource">
+                <span>Al</span>
+                <span id="alCount">0</span>
+            </div>
 
-<main>
-    <div id="board"></div>
-</main>
+        </div>
 
-    
-<script src="script.js"></script>
+        <div id="phasePanel">
+
+            <div id="dayDisplay">
+                DAY 1
+            </div>
+
+            <div id="phaseDisplay">
+                ☀ DAY
+            </div>
+
+        </div>
+
+    </header>
+
+    <main>
+
+        <div id="boardContainer">
+
+            <div id="board"></div>
+
+        </div>
+
+    </main>
+
+    <div id="floatingTextLayer"></div>
+
+    <script src="script.js"></script>
 
 </body>
 </html>
